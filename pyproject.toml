@@ -5,10 +5,27 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "faker>=38.2.0",
     "openpyxl>=3.1.5",
     "pandas>=2.3.3",
+    "polars>=1.35.2",
     "pyarrow>=22.0.0",
+    "pyxlsb>=1.0.10",
+    "textual>=6.6.0",
+    "textual-dev>=1.8.0",
+    "xlrd>=2.0.2",
 ]
+
+[project.scripts]
+excel-converter = "excel_converter.cli:main"
+excel-tui = "excel_converter.tui:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [

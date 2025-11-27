@@ -4,48 +4,76 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Excel-to-Parquet conversion tool that recursively searches directories for folders containing `/SOV/` in their path, discovers Excel files (.xlsx, .xls) within those folders, and converts each sheet to a separate Parquet file with UUID-based naming and metadata columns.
+Excel-to-Parquet conversion tool that discovers Excel files in SOV folders, converts each sheet to unpivoted long format, and saves as Parquet with metadata columns. Supports `.xlsx`, `.xlsm`, `.xlsb`, and `.xls` formats.
 
 ## Commands
 
 ```bash
-# Run the main conversion script
-uv run python excel_to_parquet.py /path/to/search --output /path/to/output
+# Run interactive TUI
+uv run excel-tui
 
-# Run all tests with coverage
-uv run pytest --cov
+# Run CLI conversion
+uv run excel-converter /path/to/search -o /path/to/output
+uv run excel-converter /path/to/search -o /output --rescan  # Force rescan
 
-# Run a specific test file
-uv run pytest tests/test_find_sov_folders.py
+# Standalone converter (specific files, no SOV filtering or caching)
+uv run python -m excel_converter.converter input.xlsx -o /output
 
-# Run a specific test
-uv run pytest tests/test_find_sov_folders.py::TestFindSovFoldersHappyPath::test_find_subdirs_in_sov_folder
+# Generate test data
+uv run python -m excel_converter.utils.test_data
 
-# Install dependencies
-uv sync
+# Tests
+uv run pytest --cov                                    # All tests with coverage
+uv run pytest tests/test_find_sov_folders.py           # Single file
+uv run pytest tests/test_find_sov_folders.py::TestFindSovFoldersHappyPath::test_find_subdirs_in_sov_folder  # Single test
 ```
 
 ## Architecture
 
-### Core Functions (excel_to_parquet.py)
+### Entry Points
 
-- `find_sov_folders(root_dirs)` - Recursively searches root directories for paths containing `/SOV/`. Returns subdirectories *within* SOV folders (not the SOV folder itself). Case-sensitive matching.
+| Module | Command | Purpose |
+|--------|---------|---------|
+| `src/excel_converter/tui.py` | `uv run excel-tui` | Interactive Textual TUI - screens for scan, browse, convert, results |
+| `src/excel_converter/cli.py` | `uv run excel-converter` | CLI with directory scanning, caching (`data/files.csv`), SOV folder detection |
+| `src/excel_converter/converter.py` | `python -m excel_converter.converter` | Standalone converter for explicit file lists (no scanning/caching) |
 
-- `process_excel_files(sov_folders, output_dir)` - Converts Excel files to Parquet. Key behaviors:
-  - Uses `header=None` to treat first row as data, not column headers
-  - Adds `file_path` (column 0) and `row_number` (column 1) metadata columns
-  - Each sheet becomes a separate Parquet file with UUID filename
-  - Continues processing on individual file/sheet errors
+### Key Design Decisions
 
-- `validate_inputs()` - Pre-flight validation of directory existence and permissions
+- **SOV folders**: Only processes files in paths containing `/SOV/` (case-sensitive)
+- **No headers**: `has_header=False` - first row is data, columns named `column_1`, `column_2`, etc.
+- **Unpivot to long format**: Wide data → normalized rows via `df.unpivot()`
+- **Idempotent**: Skips files already in existing Parquet outputs
+- **UUID filenames**: Prevents output collisions across sheets/files
+- **Engine selection**: openpyxl (.xlsx/.xlsm), pyxlsb (.xlsb), xlrd (.xls)
 
-- `main()` - CLI entry point with argparse. Exit codes: 0=success, 1=user error, 2=processing error, 3=unexpected error
+### Output Schema
 
-### Test Structure
+All Parquet files have this 6-column schema:
+```
+file_path (str), file_name (str), worksheet (str), row (int), column (int), value (str)
+```
 
-Tests organized by function with three categories per function:
-- `HappyPath` - Normal expected behavior
-- `EdgeCases` - Boundary conditions (empty inputs, case sensitivity)
-- `ErrorHandling` - Resilience (corrupted files, permission errors)
+### Core Functions (src/excel_converter/cli.py)
 
-Shared fixtures in `conftest.py`: `sample_dataframe`, `create_test_excel`, `sov_folder_structure`, `disable_logging`
+- `scan_for_excel_files(root_dirs)` → DataFrame of discovered files
+- `load_or_scan_files(root_dirs, rescan)` → Cached file list from `data/files.csv`
+- `find_sov_folders(root_dirs)` → List of directories with `/SOV/` in path
+- `process_excel_files(sov_folders, output_dir)` → Converts sheets to Parquet
+- `get_processed_file_paths(output_dir)` → Set of already-processed file paths
+
+### TUI Structure (src/excel_converter/tui.py)
+
+Screens: `MainMenu` → `ScanScreen`, `FileBrowserScreen`, `ConversionScreen`, `ResultsScreen`, `SettingsScreen`
+- Reuses core functions from `cli.py`
+- Background workers via `@work(thread=True)` decorator
+- Styles in `src/excel_converter/tui.tcss`
+
+### Test Organization
+
+Tests in `tests/` follow pattern: `Test{FunctionName}{Category}` where category is:
+- `HappyPath` - Normal behavior
+- `EdgeCases` - Boundary conditions
+- `ErrorHandling` - Resilience to failures
+
+Fixtures in `tests/conftest.py`: `sample_dataframe`, `create_test_excel`, `sov_folder_structure`, `disable_logging`

@@ -1,0 +1,2 @@
+- Explore this codebase
+- Update it so that a test set of 20 excel spreadsheets are created with random data that is tabular in nature and starts on a random row between 1 and 20 with an obvious header rows

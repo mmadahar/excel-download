@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 import pytest
 
-from excel_to_parquet import (
+from excel_converter.cli import (
     EXIT_SUCCESS,
     EXIT_USER_ERROR,
     EXIT_UNEXPECTED_ERROR,
@@ -285,7 +285,7 @@ class TestMain:
         )
 
         # Mock find_sov_folders to raise KeyboardInterrupt
-        with patch('excel_to_parquet.find_sov_folders') as mock_find:
+        with patch('excel_converter.cli.find_sov_folders') as mock_find:
             mock_find.side_effect = KeyboardInterrupt()
 
             # Act
@@ -309,7 +309,7 @@ class TestMain:
         )
 
         # Mock find_sov_folders to raise unexpected exception
-        with patch('excel_to_parquet.find_sov_folders') as mock_find:
+        with patch('excel_converter.cli.find_sov_folders') as mock_find:
             mock_find.side_effect = RuntimeError("Unexpected error")
 
             # Act
@@ -333,7 +333,7 @@ class TestMain:
         )
 
         # Mock validate_inputs to raise PermissionError
-        with patch('excel_to_parquet.validate_inputs') as mock_validate:
+        with patch('excel_converter.cli.validate_inputs') as mock_validate:
             mock_validate.side_effect = PermissionError("Permission denied")
 
             # Act
@@ -358,8 +358,8 @@ class TestMain:
         )
 
         # Act
-        with patch('excel_to_parquet.setup_logging') as mock_setup:
-            with patch('excel_to_parquet.find_sov_folders', return_value=[]):
+        with patch('excel_converter.cli.setup_logging') as mock_setup:
+            with patch('excel_converter.cli.find_sov_folders', return_value=[]):
                 main()
 
             # Assert
@@ -382,8 +382,8 @@ class TestMain:
         )
 
         # Act
-        with patch('excel_to_parquet.setup_logging') as mock_setup:
-            with patch('excel_to_parquet.find_sov_folders', return_value=[]):
+        with patch('excel_converter.cli.setup_logging') as mock_setup:
+            with patch('excel_converter.cli.find_sov_folders', return_value=[]):
                 main()
 
             # Assert

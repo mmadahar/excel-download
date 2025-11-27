@@ -1,0 +1,162 @@
+/* Excel-to-Parquet TUI Custom Styles */
+
+/* Global screen styling */
+Screen {
+    align: center middle;
+    background: $background;
+}
+
+/* Main menu container */
+#menu_container {
+    width: 80;
+    height: auto;
+    border: thick $primary;
+    padding: 3;
+    background: $surface;
+}
+
+#menu_text {
+    text-align: left;
+}
+
+/* Container styling for different screens */
+#scan_container,
+#browser_container,
+#convert_container,
+#results_container,
+#settings_container {
+    width: 100%;
+    height: 100%;
+    padding: 1 2;
+    background: $surface;
+}
+
+/* Title styling */
+#scan_title,
+#browser_title,
+#convert_title,
+#results_title,
+#settings_title {
+    text-align: center;
+    margin-bottom: 1;
+    color: $accent;
+}
+
+/* Horizontal layout containers */
+Horizontal {
+    height: auto;
+    width: 100%;
+    margin: 1 0;
+}
+
+/* Label styling */
+.label {
+    width: 20;
+    content-align: right middle;
+    padding-right: 1;
+    color: $text;
+}
+
+/* Input field styling */
+Input {
+    width: 1fr;
+    border: solid $primary;
+}
+
+Input:focus {
+    border: solid $accent;
+}
+
+/* Button styling */
+Button {
+    margin: 0 1;
+    min-width: 16;
+}
+
+Button:hover {
+    background: $primary;
+}
+
+/* DataTable styling */
+DataTable {
+    height: 1fr;
+    margin: 1 0;
+    border: solid $primary;
+    background: $surface;
+}
+
+DataTable:focus {
+    border: solid $accent;
+}
+
+/* Preview table specific styling */
+#preview_table {
+    height: 15;
+    max-height: 15;
+}
+
+/* Log widget styling */
+Log {
+    height: 1fr;
+    border: solid $primary;
+    margin: 1 0;
+    background: $surface;
+    padding: 1;
+}
+
+/* ProgressBar styling */
+ProgressBar {
+    margin: 1 0;
+    width: 100%;
+}
+
+/* Status message styling */
+#scan_status,
+#convert_status,
+#results_status,
+#browser_status {
+    margin: 1 0;
+    text-align: center;
+    height: 3;
+    content-align: center middle;
+}
+
+/* Vertical scroll container */
+VerticalScroll {
+    height: 1fr;
+    margin: 1 0;
+    border: solid $primary;
+}
+
+/* Preview title styling */
+#preview_title {
+    margin: 1 0;
+    text-align: center;
+}
+
+/* Settings content styling */
+#settings_content {
+    height: 1fr;
+    overflow-y: auto;
+    padding: 1;
+    border: solid $primary;
+}
+
+/* Switch styling */
+Switch {
+    width: auto;
+}
+
+Switch:focus {
+    background: $primary;
+}
+
+/* Footer styling */
+Footer {
+    background: $primary;
+}
+
+/* Header styling */
+Header {
+    background: $primary;
+}

@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from excel_to_parquet import find_sov_folders
+from excel_converter.cli import find_sov_folders
 
 
 class TestFindSovFoldersHappyPath:

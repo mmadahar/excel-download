@@ -8,3 +8,11 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Testing
+.coverage
+.pytest_cache/
+
+# Runtime data
+data/*.csv
+data/*.parquet
